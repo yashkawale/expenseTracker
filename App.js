@@ -7,7 +7,8 @@ import ManageExpense from "./screens/ManageExpense";
 import { Colors } from "./constants/Colors";
 import Icon from "./components/ui/Icon";
 import IconButton from "./components/ui/IconButton";
-import ExpensesContext from "./store/ExpensesContext";
+import { ExpensesContext } from "./store/ExpensesContext";
+import { StatusBar } from "expo-status-bar";
 
 const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
@@ -62,6 +63,7 @@ const ExpensesOverView = () => {
 const App = () => {
   return (
     <ExpensesContext>
+      <StatusBar style="light" />
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{

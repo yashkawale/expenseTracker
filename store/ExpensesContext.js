@@ -29,7 +29,7 @@ const Dummy_Data = [
     id: 5,
     description: "Iphone",
     amount: 70000,
-    date: new Date("2023-07-29"),
+    date: new Date("2024-01-20"),
   },
   {
     id: 6,
@@ -63,7 +63,7 @@ const Dummy_Data = [
   },
 ];
 
-export const ExpensesStoreContext = createContext({
+const ExpensesStoreContext = createContext({
   expenses: [],
   addExpense: ({ description, date, amount }) => {},
   deleteExpense: (id) => {},
@@ -73,7 +73,7 @@ export const ExpensesStoreContext = createContext({
 const expensesReducer = (state, action) => {
   switch (action.type) {
     case "ADD":
-      const id = new Date().toDateString + Math.random();
+      const id = new Date().toDateString() + Math.random();
       return [{ ...action.payload, id: id }, ...state];
     case "DELETE":
       return state.filter((expense) => expense.id !== action.payload);
@@ -83,13 +83,15 @@ const expensesReducer = (state, action) => {
       );
       const updateExpense = state[expenseIndex];
       const updatedExpense = { ...updateExpense, ...action.payload.data };
-      return [{ ...updatedExpense }, ...state];
+      const updatedExpenses = [...state];
+      updatedExpenses[expenseIndex] = updatedExpense;
+      return updatedExpenses;
     default:
       return state;
   }
 };
 
-const ExpensesContext = ({ Children }) => {
+const ExpensesContext = ({ children }) => {
   const [expensesState, dispatch] = useReducer(expensesReducer, Dummy_Data);
 
   const addExpense = (expensesData) => {
@@ -111,9 +113,9 @@ const ExpensesContext = ({ Children }) => {
 
   return (
     <ExpensesStoreContext.Provider value={values}>
-      {Children}
+      {children}
     </ExpensesStoreContext.Provider>
   );
 };
 
-export default ExpensesContext;
+export { ExpensesContext, ExpensesStoreContext };

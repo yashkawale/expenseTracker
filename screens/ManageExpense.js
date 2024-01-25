@@ -1,13 +1,17 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useLayoutEffect } from "react";
+import React, { useContext, useLayoutEffect } from "react";
 import IconButton from "../components/ui/IconButton";
 import { Colors } from "../constants/Colors";
-import CustomButton from "../components/ui/CustomButton";
+import { ExpensesStoreContext } from "../store/ExpensesContext";
+import ExpenseForm from "../components/ExpensesForm/ExpenseForm";
 
 const ManageExpense = ({ route, navigation }) => {
   const expenseId = route.params?.itemId;
   const isEditing = !!expenseId;
-
+  const expensesContext = useContext(ExpensesStoreContext);
+  const selectedExpense = expensesContext.expenses.find(
+    (expense) => expense.id === expenseId
+  );
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isEditing ? "Edit Expenses" : "Add Expenses",
@@ -18,23 +22,29 @@ const ManageExpense = ({ route, navigation }) => {
     navigation.goBack();
   };
 
-  const handleAddUpdate = () => {
+  const handleAddUpdate = (expenseData) => {
+    if (isEditing) {
+      expensesContext.updateExpense(expenseId, expenseData);
+    } else {
+      expensesContext.addExpense(expenseData);
+    }
     navigation.goBack();
   };
 
   const handleDelete = () => {
+    expensesContext.deleteExpense(expenseId);
     navigation.goBack();
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.buttonContainer}>
-        <CustomButton title="Cancel" mode="flat" onPress={handleCancel} />
-        <CustomButton
-          title={isEditing ? "Update" : "Add"}
-          onPress={handleAddUpdate}
-        />
-      </View>
+      <ExpenseForm
+        isEditing={isEditing}
+        onCancel={handleCancel}
+        onSubmit={handleAddUpdate}
+        defaultExpense={selectedExpense}
+      />
+
       {isEditing && (
         <View style={styles.innerContainer}>
           <IconButton
@@ -55,12 +65,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.beige,
-    justifyContent: "center",
-  },
-
-  buttonContainer: {
-    flexDirection: "row",
-    alignItems: "center",
     justifyContent: "center",
   },
 

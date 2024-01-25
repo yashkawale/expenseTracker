@@ -4,11 +4,11 @@ import ExpensesSummary from "./ExpensesSummary";
 import ExpensesList from "./ExpensesList";
 import { Colors } from "../../constants/Colors";
 
-const ExpensesOutput = ({ expensesTime }) => {
+const ExpensesOutput = ({ expenses, expensesTime }) => {
   return (
     <View style={styles.container}>
-      {/* <ExpensesSummary expenses={} timeline={expensesTime} />
-      <ExpensesList expenses={} /> */}
+      <ExpensesSummary expenses={expenses} timeline={expensesTime} />
+      <ExpensesList expenses={expenses} />
     </View>
   );
 };
