@@ -68,6 +68,7 @@ const ExpensesStoreContext = createContext({
   addExpense: ({ description, date, amount }) => {},
   deleteExpense: (id) => {},
   updateExpense: (id, { description, date, amount }) => {},
+  setExpense: (expenses) => {},
 });
 
 const expensesReducer = (state, action) => {
@@ -86,13 +87,16 @@ const expensesReducer = (state, action) => {
       const updatedExpenses = [...state];
       updatedExpenses[expenseIndex] = updatedExpense;
       return updatedExpenses;
+    case "SET":
+      const reversed = action.payload.reverse();
+      return reversed;
     default:
       return state;
   }
 };
 
 const ExpensesContext = ({ children }) => {
-  const [expensesState, dispatch] = useReducer(expensesReducer, Dummy_Data);
+  const [expensesState, dispatch] = useReducer(expensesReducer, []);
 
   const addExpense = (expensesData) => {
     dispatch({ type: "ADD", payload: expensesData });
@@ -104,11 +108,16 @@ const ExpensesContext = ({ children }) => {
     dispatch({ type: "UPDATE", payload: { id: id, data: expensesData } });
   };
 
+  const setExpense = (expenses) => {
+    dispatch({ type: "SET", payload: expenses });
+  };
+
   const values = {
     expenses: expensesState,
     addExpense: addExpense,
     deleteExpense: deleteExpense,
     updateExpense: updateExpense,
+    setExpense: setExpense,
   };
 
   return (

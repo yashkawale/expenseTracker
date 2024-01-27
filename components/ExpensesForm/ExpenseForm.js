@@ -6,62 +6,68 @@ import CustomButton from "../ui/CustomButton";
 
 const ExpenseForm = ({ onCancel, isEditing, onSubmit, defaultExpense }) => {
   const [inputValues, setInputValues] = useState({
-    amount: {
-      value: defaultExpense ? defaultExpense.amount.toString() : "",
-      isValid: true,
-    },
-    date: {
-      value: defaultExpense
-        ? defaultExpense.date.toISOString().slice(0, 10)
-        : "",
-      isValid: true,
-    },
-    description: {
-      value: defaultExpense ? defaultExpense.description : "",
-      isValid: true,
-    },
+    amount: defaultExpense ? defaultExpense.amount.toString() : "",
+    date: defaultExpense ? defaultExpense.date.toISOString().slice(0, 10) : "",
+    description: defaultExpense ? defaultExpense.description : "",
+  });
+
+  const [inputValidity, setInputValidity] = useState({
+    amount: true,
+    date: true,
+    description: true,
   });
 
   const handleInputValues = (identifier, enteredValue) => {
-    setInputValues((currValue) => {
-      return {
-        ...currValue,
-        [identifier]: { value: enteredValue, isValid: true },
-      };
-    });
+    setInputValues((currValues) => ({
+      ...currValues,
+      [identifier]: enteredValue,
+    }));
+  };
+
+  const validateInput = (identifier, enteredValue) => {
+    switch (identifier) {
+      case "amount":
+        return !isNaN(enteredValue) && parseFloat(enteredValue) > 0;
+
+      case "date":
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        return dateRegex.test(enteredValue);
+
+      case "description":
+        return enteredValue.trim().length > 0;
+
+      default:
+        return true;
+    }
   };
 
   const submitHandler = () => {
-    const expenseData = {
-      amount: +inputValues.amount.value,
-      date: new Date(inputValues.date.value),
-      description: inputValues.description.value,
-    };
+    const amountIsValid = validateInput("amount", inputValues.amount);
+    const dateIsValid = validateInput("date", inputValues.date);
+    const descriptionIsValid = validateInput(
+      "description",
+      inputValues.description
+    );
 
-    const amountIsValid = !isNaN(expenseData.amount) && expenseData.amount > 0;
-    const dateIsValid = expenseData.date.toString() !== "Invalid Date";
-    const descriptionIsValid = expenseData.description.trim().length > 0;
+    setInputValidity({
+      amount: amountIsValid,
+      date: dateIsValid,
+      description: descriptionIsValid,
+    });
 
-    if (!amountIsValid || !dateIsValid || !descriptionIsValid) {
-      setInputValues((currValue) => {
-        return {
-          amount: { value: currValue.amount.value, isValid: amountIsValid },
-          date: { value: currValue.date.value, isValid: dateIsValid },
-          description: {
-            value: currValue.description.value,
-            isValid: descriptionIsValid,
-          },
-        };
-      });
+    if (amountIsValid && dateIsValid && descriptionIsValid) {
+      const expenseData = {
+        amount: +inputValues.amount,
+        date: new Date(inputValues.date),
+        description: inputValues.description,
+      };
+
+      onSubmit(expenseData);
     }
-
-    onSubmit(expenseData);
   };
 
   const isFormValid =
-    !inputValues.amount.isValid ||
-    !inputValues.date.isValid ||
-    !inputValues.description.isValid;
+    !inputValidity.amount || !inputValidity.date || !inputValidity.description;
 
   return (
     <View style={styles.container}>
@@ -71,33 +77,40 @@ const ExpenseForm = ({ onCancel, isEditing, onSubmit, defaultExpense }) => {
         <CustomInput
           style={styles.rowFlex}
           label="Amount"
+          inValid={!inputValidity.amount}
           inputConfig={{
             inputMode: "decimal",
-            value: inputValues.amount.value,
+            value: inputValues.amount,
             onChangeText: handleInputValues.bind(this, "amount"),
           }}
         />
         <CustomInput
           style={styles.rowFlex}
           label="Date"
+          inValid={!inputValidity.date}
           inputConfig={{
             maxLength: 10,
             placeholder: "YYYY-MM-DD",
-            value: inputValues.date.value,
+            value: inputValues.date,
             onChangeText: handleInputValues.bind(this, "date"),
           }}
         />
       </View>
       <CustomInput
         label="Description"
+        inValid={!inputValidity.description}
         inputConfig={{
           multiline: true,
           autoCapitalize: "none",
-          value: inputValues.description.value,
+          value: inputValues.description,
           onChangeText: handleInputValues.bind(this, "description"),
         }}
       />
-      {isFormValid && <Text>Invalid input</Text>}
+      {isFormValid && (
+        <Text style={styles.errorText}>
+          Invalid entries!! {"\n"} Enter valid data into the fields.
+        </Text>
+      )}
       <View style={styles.buttonContainer}>
         <CustomButton title="Cancel" mode="flat" onPress={onCancel} />
         <CustomButton
@@ -141,5 +154,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 15,
+  },
+
+  errorText: {
+    textAlign: "center",
+    margin: 8,
+    color: Colors.red,
   },
 });

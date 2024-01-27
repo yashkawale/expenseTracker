@@ -2,11 +2,15 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import React from "react";
 import { Colors } from "../../constants/Colors";
 
-const CustomInput = ({ label, inputConfig, style }) => {
+const CustomInput = ({ label, inputConfig, style, inValid }) => {
   const inputStyles = [styles.input];
 
   if (inputConfig && inputConfig.multiline) {
     inputStyles.push(styles.inputMultiline);
+  }
+
+  if (inValid) {
+    inputStyles.push(styles.invalidInput);
   }
 
   return (
@@ -36,5 +40,9 @@ const styles = StyleSheet.create({
 
   inputMultiline: {
     height: 100,
+  },
+
+  invalidInput: {
+    backgroundColor: Colors.red,
   },
 });

@@ -4,6 +4,7 @@ import IconButton from "../components/ui/IconButton";
 import { Colors } from "../constants/Colors";
 import { ExpensesStoreContext } from "../store/ExpensesContext";
 import ExpenseForm from "../components/ExpensesForm/ExpenseForm";
+import { sendDataToDatabase } from "../utils/http";
 
 const ManageExpense = ({ route, navigation }) => {
   const expenseId = route.params?.itemId;
@@ -26,6 +27,7 @@ const ManageExpense = ({ route, navigation }) => {
     if (isEditing) {
       expensesContext.updateExpense(expenseId, expenseData);
     } else {
+      sendDataToDatabase(expenseData);
       expensesContext.addExpense(expenseData);
     }
     navigation.goBack();

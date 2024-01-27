@@ -18,7 +18,7 @@ const ExpenseItem = ({ id, description, date, amount }) => {
         pressed ? [styles.container, styles.pressed] : styles.container
       }
     >
-      <View>
+      <View style={styles.descriptionContainer}>
         <Text style={styles.description}>{description}</Text>
         <Text style={styles.date}>{date.toDateString()}</Text>
       </View>
@@ -54,6 +54,12 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 16,
     fontWeight: "600",
+    overflow: "scroll",
+    paddingBottom: 8,
+  },
+
+  descriptionContainer: {
+    maxWidth: "75%",
   },
 
   date: {
