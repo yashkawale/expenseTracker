@@ -74,8 +74,8 @@ const ExpensesStoreContext = createContext({
 const expensesReducer = (state, action) => {
   switch (action.type) {
     case "ADD":
-      const id = new Date().toDateString() + Math.random();
-      return [{ ...action.payload, id: id }, ...state];
+      // const id = new Date().toDateString() + Math.random();
+      return [action.payload, ...state];
     case "DELETE":
       return state.filter((expense) => expense.id !== action.payload);
     case "UPDATE":

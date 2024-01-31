@@ -1,15 +1,23 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { useContext, useLayoutEffect } from "react";
+import React, { useContext, useLayoutEffect, useState } from "react";
 import IconButton from "../components/ui/IconButton";
 import { Colors } from "../constants/Colors";
 import { ExpensesStoreContext } from "../store/ExpensesContext";
 import ExpenseForm from "../components/ExpensesForm/ExpenseForm";
-import { sendDataToDatabase } from "../utils/http";
+import {
+  deleteDataInDataBase,
+  sendDataToDatabase,
+  updateDataInDatabase,
+} from "../utils/http";
+import LoadingOverlay from "../components/ui/LoadingOverlay";
+import ErrorOverlay from "../components/ui/ErrorOverlay";
 
 const ManageExpense = ({ route, navigation }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState();
+  const expensesContext = useContext(ExpensesStoreContext);
   const expenseId = route.params?.itemId;
   const isEditing = !!expenseId;
-  const expensesContext = useContext(ExpensesStoreContext);
   const selectedExpense = expensesContext.expenses.find(
     (expense) => expense.id === expenseId
   );
@@ -23,20 +31,42 @@ const ManageExpense = ({ route, navigation }) => {
     navigation.goBack();
   };
 
-  const handleAddUpdate = (expenseData) => {
-    if (isEditing) {
-      expensesContext.updateExpense(expenseId, expenseData);
-    } else {
-      sendDataToDatabase(expenseData);
-      expensesContext.addExpense(expenseData);
+  const handleAddUpdate = async (expenseData) => {
+    setIsSubmitting(true);
+    try {
+      if (isEditing) {
+        expensesContext.updateExpense(expenseId, expenseData);
+        await updateDataInDatabase(expenseId, expenseData);
+      } else {
+        const id = await sendDataToDatabase(expenseData);
+        expensesContext.addExpense({ ...expenseData, id: id });
+      }
+      navigation.goBack();
+    } catch (error) {
+      setError("Check your internet connectivity!");
     }
-    navigation.goBack();
+    setIsSubmitting(false);
   };
 
-  const handleDelete = () => {
-    expensesContext.deleteExpense(expenseId);
-    navigation.goBack();
+  const handleDelete = async () => {
+    setIsSubmitting(true);
+    try {
+      await deleteDataInDataBase(expenseId);
+      expensesContext.deleteExpense(expenseId);
+      navigation.goBack();
+    } catch (error) {
+      setError("Check your internet connectivity!");
+    }
+    setIsSubmitting(false);
   };
+
+  if (isSubmitting) {
+    return <LoadingOverlay />;
+  }
+
+  if (error && !isSubmitting) {
+    return <ErrorOverlay message={error} />;
+  }
 
   return (
     <View style={styles.container}>
